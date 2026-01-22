@@ -21,20 +21,35 @@ localparam TYPE_J_OPCODE = 'b1101111;
 localparam TYPE_LUI_OPCODE = 'b0110111;
 localparam TYPE_AUIPC_OPCODE = 'b0010111;
 
-localparam ADDI = 'b000;
-localparam SLTI = 'b010;
-localparam SLTIU = 'b011;
-localparam XORI = 'b100;
-localparam ORI = 'b110;
-localparam ANDI = 'b111;
+localparam ADDI_FN3 = 'b000;
+localparam SLTI_FN3 = 'b010;
+localparam SLTIU_FN3 = 'b011;
+localparam XORI_FN3 = 'b100;
+localparam ORI_FN3 = 'b110;
+localparam ANDI_FN3 = 'b111;
 
-localparam ADD = 'b000;
-localparam SUB = 'b000;
-localparam SLL = ;
-localparam SRL = ;
-localparam SRA = ;
-localparam OR = ;
-localparam XOR = ;
+localparam ADD_FN3 = 'b000;
+localparam SUB_FN3 = 'b000;
+localparam SLL_FN3 = 'b001;
+localparam SRL_FN3 = 'b101;
+localparam SRA_FN3 = 'b101;
+localparam OR_FN3 = 'b110;
+localparam XOR_FN3 = 'b100;
+
+localparam BEQ_FN3 = 'b000;
+localparam BNE_FN3 = 'b001;
+localparam BLT_FN3 = 'b100;
+localparam BLTU_FN3 = 'b110;
+localparam BGE_FN3 = 'b101;
+localparam BGEU_FN3 = 'b111;
+
+localparam ADD_FN7 = 'b0000000;
+localparam SUB_FN7 = 'b0100000;
+localparam SLL_FN7 = 'b0000000;
+localparam SRL_FN7 = 'b0000000;
+localparam SRA_FN7 = 'b0100000;
+localparam OR_FN7 =  'b0000000;
+localparam XOR_FN7 = 'b0000000;
 
 localparam TYPE_I = 'h14;
 localparam TYPE_S = 'h15;
@@ -152,7 +167,18 @@ always @ (posedge clk or posedge rst) begin
 			case (current_instr_class)
 				TYPE_I: begin
 					case (funct3)
-						
+						ADDI_FN3: begin
+						end
+						SLTI_FN3: begin
+						end
+						SLTIU_FN3: begin
+						end
+						XORI_FN3: begin
+						end
+						ORI_FN3: begin
+						end
+						ANDI_FN3: begin
+						end
 					endcase
 				end
 				TYPE_B: begin
