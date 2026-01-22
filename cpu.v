@@ -168,30 +168,38 @@ always @ (posedge clk or posedge rst) begin
 				TYPE_I: begin
 					case (funct3)
 						ADDI_FN3: begin
-							regs[rd] <= regs[rs] + i_type_imm;					
+							regs[rd] <= regs[rs] + i_type_imm;
+							current_state <= IDLE;
 						end
 						SLTI_FN3: begin
 							if ($signed(regs[rs1]) < $signed(i_type_imm)) begin
 								regs[rd] <= 1;
+								current_state <= IDLE;
 							end else begin
 								regs[rd] <= 0;
+								current_state <= IDLE;
 							end
 						end
 						SLTIU_FN3: begin
 							if ($unsigned(regs[rs1]) < $unsigned(regs[rd])) begin
 								regs[rd] <= 1;
+								current_state <= IDLE;
 							end else begin
 								regs[rd] <= 0;
+								current_state <= IDLE;
 							end
 						end
 						XORI_FN3: begin
 							regs[rd] <= regs[rs1] ^ i_type_imm;
+							current_state <= IDLE;
 						end
 						ORI_FN3: begin
 							regs[rd] <= regs[rs1] | i_type_imm;
+							current_state <= IDLE;
 						end
 						ANDI_FN3: begin
 							regs[rd] <= regs[rs1] & i_type_imm;
+							current_state <= IDLE;
 						end
 					endcase
 				end
@@ -200,6 +208,47 @@ always @ (posedge clk or posedge rst) begin
 				TYPE_J: begin
 				end
 				TYPE_R: begin
+					if (funct3 == ADD_FN3 && funct7 == ADD_FN7) begin
+						regs[rd] <= regs[rs1] + regs[rs2];
+						current_state <= IDLE;
+					end else if (funct3 == SUB_FN3 && funct7 == SUB_FN7) begin
+						regs[rd] <= regs[rs1] - regs[rs2];
+						current_state <= IDLE;
+					end else if (funct3 == SLL_FN3 && funct7 == SLL_FN7) begin
+						regs[rd] <= regs[rs1] << regs[rs2];
+						current_state <= IDLE;
+					end else if (funct3 == SLT_FN3 && funct7 == SLT_FN7) begin
+						if ($signed(regs[rs1]) < $signed(regs[rs2])) begin
+							regs[rd] <= 1;
+							current_state <= IDLE;
+						end else begin
+							regs[rd] <= 0;
+							current_state <= IDLE;
+						end
+					end else if (funct3 == SLTU_FN3 && funct7 == SLTU_FN7) begin
+						if ($unsigned(regs[rs1]) < $unsigned(regs[rs2])) begin
+							regs[rd] <= 1;
+							current_state <= IDLE;
+						end else begin
+							regs[rd] <= 0;
+							current_state <= IDLE;
+						end
+					end else if (funct3 == XOR_FN3 && funct7 == XOR_FN7) begin
+						regs[rd] <= regs[rs1] ^ regs[rs2];
+						current_state <= IDLE;
+					end else if (funct3 == SRL_FN3 && funct7 == SRL_FN7) begin
+						regs[rd] <= regs[rs1] >> regs[rs2];
+						current_state <= IDLE;
+					end else if (funct3 == SRA_FN3 && funct7 == SRA_FN7) begin
+						regs[rd] <= regs[rs1] >> regs[rs2];
+						current_state <= IDLE;
+					end else if (funct3 == OR_FN3 && funct7 == OR_FN7) begin
+						regs[rd] <= regs[rs1] | regs[rs2];
+						current_state <= IDLE;
+					end else if (funct3 == AND_FN3 && funct7 == AND_FN7) begin
+						regs[rd] <= regs[rs1] & regs[rs2];
+						current_state <= IDLE;
+					end
 				end
 				TYPE_S: begin
 				end
