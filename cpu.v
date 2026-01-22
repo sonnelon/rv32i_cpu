@@ -13,53 +13,86 @@ localparam IDLE = 3;
 
 localparam INSTR_SIZE = 32;
 
-localparam TYPE_I_OPCODE = 'b0010011;
-localparam TYPE_S_OPCODE = 'b0100011;
-localparam TYPE_R_OPCODE = 'b0110011;
-localparam TYPE_B_OPCODE = 'b1100011;
-localparam TYPE_J_OPCODE = 'b1101111;
-localparam TYPE_LUI_OPCODE = 'b0110111;
-localparam TYPE_AUIPC_OPCODE = 'b0010111;
+localparam TYPE_I_OPCODE = 7'b0010011;
+localparam TYPE_S_OPCODE = 7'b0100011;
+localparam TYPE_R_OPCODE = 7'b0110011;
+localparam TYPE_B_OPCODE = 7'b1100011;
+localparam TYPE_J_OPCODE = 7'b1101111;
+localparam TYPE_LUI_OPCODE = 7'b0110111;
+localparam TYPE_AUIPC_OPCODE = 7'b0010111;
 
-localparam ADDI_FN3 = 'b000;
-localparam SLTI_FN3 = 'b010;
-localparam SLTIU_FN3 = 'b011;
-localparam XORI_FN3 = 'b100;
-localparam ORI_FN3 = 'b110;
-localparam ANDI_FN3 = 'b111;
+localparam ADDI_FN3 = 3'b000;
+localparam SLTI_FN3 = 3'b010;
+localparam SLTIU_FN3 = 3'b011;
+localparam XORI_FN3 = 3'b100;
+localparam ORI_FN3 = 3'b110;
+localparam ANDI_FN3 = 3'b111;
 
-localparam ADD_FN3 = 'b000;
-localparam SUB_FN3 = 'b000;
-localparam SLL_FN3 = 'b001;
-localparam SRL_FN3 = 'b101;
-localparam SRA_FN3 = 'b101;
-localparam OR_FN3 = 'b110;
-localparam XOR_FN3 = 'b100;
+localparam ADD_FN3 = 3'b000;
+localparam SUB_FN3 = 3'b000;
+localparam SLL_FN3 = 3'b001;
+localparam SRL_FN3 = 3'b101;
+localparam SRA_FN3 = 3'b101;
+localparam OR_FN3 = 3'b110;
+localparam XOR_FN3 = 3'b100;
 
-localparam BEQ_FN3 = 'b000;
-localparam BNE_FN3 = 'b001;
-localparam BLT_FN3 = 'b100;
-localparam BLTU_FN3 = 'b110;
-localparam BGE_FN3 = 'b101;
-localparam BGEU_FN3 = 'b111;
+localparam BEQ_FN3 = 3'b000;
+localparam BNE_FN3 = 3'b001;
+localparam BLT_FN3 = 3'b100;
+localparam BLTU_FN3 = 3'b110;
+localparam BGE_FN3 = 3'b101;
+localparam BGEU_FN3 = 3'b111;
 
-localparam ADD_FN7 = 'b0000000;
-localparam SUB_FN7 = 'b0100000;
-localparam SLL_FN7 = 'b0000000;
-localparam SRL_FN7 = 'b0000000;
-localparam SRA_FN7 = 'b0100000;
-localparam OR_FN7 =  'b0000000;
-localparam XOR_FN7 = 'b0000000;
+localparam ADD_FN7 = 7'b0000000;
+localparam SUB_FN7 = 7'b0100000;
+localparam SLL_FN7 = 7'b0000000;
+localparam SRL_FN7 = 7'b0000000;
+localparam SRA_FN7 = 7'b0100000;
+localparam OR_FN7 =  7'b0000000;
+localparam XOR_FN7 = 7'b0000000;
 
-localparam TYPE_I = 'h14;
-localparam TYPE_S = 'h15;
-localparam TYPE_R = 'h16;
-localparam TYPE_B = 'h17;
-localparam TYPE_J = 'h18;
-localparam TYPE_LUI = 'h19;
-localparam TYPE_AUIPC = 'h20;
+localparam TYPE_I = 2'h14;
+localparam TYPE_S = 2'h15;
+localparam TYPE_R = 2'h16;
+localparam TYPE_B = 2'h17;
+localparam TYPE_J = 2'h18;
+localparam TYPE_LUI = 2'h19;
+localparam TYPE_AUIPC = 2'h20;
 
-localparam NOTHING = 'h100;
+localparam NOTHING = 3'h100;
+
+localparam X0_OPCODE  = 5'b00000;
+localparam X1_OPCODE  = 5'b00001;
+localparam X2_OPCODE  = 5'b00010;
+localparam X3_OPCODE  = 5'b00011;
+localparam X4_OPCODE  = 5'b00100;
+localparam X5_OPCODE  = 5'b00101;
+localparam X6_OPCODE  = 5'b00110;
+localparam X7_OPCODE  = 5'b00111;
+localparam X8_OPCODE  = 5'b01000;
+localparam X9_OPCODE  = 5'b01001;
+localparam X10_OPCODE = 5'b01010;
+localparam X11_OPCODE = 5'b01011;
+localparam X12_OPCODE = 5'b01100;
+localparam X13_OPCODE = 5'b01101;
+localparam X14_OPCODE = 5'b01110;
+localparam X15_OPCODE = 5'b01111;
+localparam X16_OPCODE = 5'b10000;
+localparam X17_OPCODE = 5'b10001;
+localparam X18_OPCODE = 5'b10010;
+localparam X19_OPCODE = 5'b10011;
+localparam X20_OPCODE = 5'b10100;
+localparam X21_OPCODE = 5'b10101;
+localparam X22_OPCODE = 5'b10110;
+localparam X23_OPCODE = 5'b10111;
+localparam X24_OPCODE = 5'b11000;
+localparam X25_OPCODE = 5'b11001;
+localparam X26_OPCODE = 5'b11010;
+localparam X27_OPCODE = 5'b11011;
+localparam X28_OPCODE = 5'b11100;
+localparam X29_OPCODE = 5'b11101;
+localparam X30_OPCODE = 5'b11110;
+localparam X31_OPCODE = 5'b11111;
 
 parameter COUNT_RAM_WORD = 1024;
 parameter SIZE_WORD		 = 32;
@@ -164,10 +197,42 @@ always @ (posedge clk or posedge rst) begin
 		end
 
 		EXEC: begin
+			function get_reg [31:0] register;
+				input [31:0] num;
+				begin
+					case (num)
+						X0_OPCODE: begin
+						end
+						X1_OPCODE: begin
+						end
+						X2_OPCODE: begin
+						end
+						X3_OPCODE: begin
+						end
+						X4_OPCODE: begin
+						end
+						X5_OPCODE: begin
+						end
+						X6_OPCODE: begin
+						end
+						X7_OPCODE: begin
+						end
+						X8_OPCODE: begin
+						end
+						X9_OPCODE: begin
+						end
+						X10_OPCODE: begin
+						end
+						X11_OPCODE: begin
+						end
+					endcase
+				end
+			endfunction
 			case (current_instr_class)
 				TYPE_I: begin
 					case (funct3)
 						ADDI_FN3: begin
+							
 						end
 						SLTI_FN3: begin
 						end
