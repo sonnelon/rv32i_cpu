@@ -1,0 +1,183 @@
+module cpu (
+	input wire clk,
+	input wire rst,
+);
+
+reg [31:0] regs [0:31];
+reg [31:0] pc;
+
+localparam FETCH = 0;
+localparam DECODE = 1;
+localparam EXEC = 2;
+localparam IDLE = 3;
+
+localparam INSTR_SIZE = 32;
+
+localparam TYPE_I_OPCODE = 'b0010011;
+localparam TYPE_S_OPCODE = 'b0100011;
+localparam TYPE_R_OPCODE = 'b0110011;
+localparam TYPE_B_OPCODE = 'b1100011;
+localparam TYPE_J_OPCODE = 'b1101111;
+localparam TYPE_LUI_OPCODE = 'b0110111;
+localparam TYPE_AUIPC_OPCODE = 'b0010111;
+
+localparam ADDI = 'b000;
+localparam SLTI = 'b010;
+localparam SLTIU = 'b011;
+localparam XORI = 'b100;
+localparam ORI = 'b110;
+localparam ANDI = 'b111;
+
+localparam ADD = 'b000;
+localparam SUB = 'b000;
+localparam SLL = ;
+localparam SRL = ;
+localparam SRA = ;
+localparam OR = ;
+localparam XOR = ;
+
+localparam TYPE_I = 'h14;
+localparam TYPE_S = 'h15;
+localparam TYPE_R = 'h16;
+localparam TYPE_B = 'h17;
+localparam TYPE_J = 'h18;
+localparam TYPE_LUI = 'h19;
+localparam TYPE_AUIPC = 'h20;
+
+localparam NOTHING = 'h100;
+
+parameter COUNT_RAM_WORD = 1024;
+parameter SIZE_WORD		 = 32;
+
+reg [2:0] current_instr_class;
+
+wire [6:0] 		opcode;
+wire [4:0] 		rd;
+wire [1:0] 		funct3;
+wire [4:0] 		rs1;
+wire [4:0] 		rs2;
+wire [6:0] 		funct7;
+wire [11:0] 	i_type_imm;
+wire [4:0] 		s_type_imm;
+wire [6:0] 		s_type_imm2;
+wire [19:0] 	u_type_imm;
+wire [4:0] 		b_type_imm;
+wire [6:0] 		b_type_imm2;
+wire [8:0] 		j_type_imm;
+wire [11:0] 	j_type_imm2;
+
+reg [1:0] current_state;
+reg [SIZE_WORD-1:0] ram [0:COUNT_RAM_WORD-1];
+reg [INSTR_SIZE-1:0] instr;
+
+always @ (posedge clk or posedge rst) begin
+	if (rst) begin
+		pc <= 0;
+		integer i;
+		for (i = 0; i < COUNT_RAM_WORD; i = i + 1) begin
+			regs[i] <= 'b0;
+		end
+		current_state <= IDLE;
+		current_instr_class <= NOTHING;
+		instr <= 0;
+
+	end else begin
+		case (current_state)
+		FETCH: begin
+			instr <= ram[pc >> 2];
+			current_state <= DECODE;	
+		end
+
+		DECODE: begin
+			opcode <= instr[6:0];
+			case (opcode)
+			TYPE_I_OPCODE: begin
+				rd <= instr[11:7];
+				funct3 <= instr[14:12];
+				rs1 <= instr[19:15];
+				i_type_imm  <= instr[31:20];
+				current_instr_class <= TYPE_I;
+				current_state <= EXEC;
+			end
+			TYPE_B_OPCODE: begin
+				b_type_imm <= instr[11:7];
+				funct3 <= instr[14:12];
+				rs1 <= instr[19:15];
+				rs2 <= instr[24:20];
+				b_type_imm2 <= instr[31:25];
+				current_instr_class <= TYPE_B;
+				current_state <= EXEC;
+			end
+			TYPE_J_OPCODE: begin
+				rd <= instr[11:7];
+				j_type_imm <= instr[20:12];
+				j_type_imm2 <= instr[31:21];
+				current_instr_class <= TYPE_J;
+				current_state <= EXEC;
+			end
+			TYPE_R_OPCODE: begin
+				rd <= instr[11:7];
+				funct3 <= instr[14:12];
+				rs <= instr[19:15];
+				rs2 <= instr[24:20];
+				funct7 <= instr[31:25];
+				current_instr_class <= TYPE_R;
+				current_state <= EXEC;
+			end
+			TYPE_S_OPCODE: begin
+				s_type_imm <= instr[11:7];
+				funct3 <= instr[14:12];
+				rs <= instr[19:15];
+				rs2 <= instr[24:20];
+				s_type_imm2 <= instr[31:25];
+				current_instr_state <= TYPE_S;
+				current_state <= EXEC;
+			end
+			TYPE_LUI_OPCODE: begin
+				rd <= instr[11:7];
+				u_type_imm <= instr[31:12];
+				current_instr_class <= TYPE_LUI;
+				current_state <= EXEC;
+			end
+			TYPE_AUIPC_OPCODE: begin
+				rd <= instr[11:7];
+				u_type_imm <= instr[31:12];
+				current_instr_class <= TYPE_AUIPC;
+				current_state <= EXEC;
+			end
+			endcase
+		end
+
+		EXEC: begin
+			case (current_instr_class)
+				TYPE_I: begin
+					case (funct3)
+						
+					endcase
+				end
+				TYPE_B: begin
+				end
+				TYPE_J: begin
+				end
+				TYPE_R: begin
+				end
+				TYPE_S: begin
+				end
+				TYPE_AUIPC: begin
+				end
+				TYPE_LUI: begin
+				end
+			endcase
+		end
+
+		IDLE: begin
+			if (pc != 0) begin
+				current_state <= FETCH;
+			end 
+		end
+
+		endcase
+	end
+end
+
+endmodule
