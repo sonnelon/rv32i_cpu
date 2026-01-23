@@ -95,7 +95,6 @@ always @ (posedge clk or posedge rst) begin
 		current_state <= IDLE;
 		current_instr_class <= NOTHING;
 		instr <= 0;
-
 	end else begin
 		case (current_state)
 		FETCH: begin
@@ -204,6 +203,56 @@ always @ (posedge clk or posedge rst) begin
 					endcase
 				end
 				TYPE_B: begin
+					case (funct3)
+						BEQ_FN3: begin
+							if (regs[rs1] == regs[rs2]) begin
+								pc <= pc + ((b_type_imm2 << 5) + b_type_imm);
+								current_state <= IDLE;
+							end else begin
+								current_state <= IDLE;
+							end
+						end
+						BNE_FN3: begin
+							if (regs[rs1] != regs[rs2]) begin
+								pc <= pc + ((b_type_imm2 << 5) + b_type_imm);
+								current_state <= IDLE;
+							end else begin
+								current_state <= IDLE;
+							end
+						end
+						BLT_FN3: begin
+							if ($signed(regs[rs1]) < $signed(regs[rs2])) begin
+								pc <= pc + ((b_type_imm2 << 5) + b_type_imm);
+								current_state <= IDLE;	
+							end else begin
+								current_state <= IDLE;
+							end
+						end
+						BGE_FN3: begin
+							if ($signed(regs[rs1]) >= $signed(regs[rs2])) begin
+								pc <= pc + ((b_type_imm2 << 5) + b_type_imm);
+								current_state <= IDLE;
+							end else begin
+								current_state <= IDLE;
+							end
+						end
+						BLTU_FN3: begin
+							if ($unsigned(regs[rs1]) > $unsigned(regs[rs2])) begin
+								pc <= pc + ((b_type_imm2 << 5) + b_type_imm);
+								current_state <= IDLE;
+							end else begin
+								current_state <= IDLE;
+							end
+						end
+						BGEU_FN3: begin
+							if ($unsigned(regs[rs1]) >= $unsigned(regs[rs2])) begin
+								pc <= pc + ((b_type_imm2 << 5) + b_type_imm);
+								current_state <= IDLE;
+							end else begin
+								current_state <= IDLE;
+							end
+						end
+					endcase
 				end
 				TYPE_J: begin
 				end
@@ -253,8 +302,12 @@ always @ (posedge clk or posedge rst) begin
 				TYPE_S: begin
 				end
 				TYPE_AUIPC: begin
+					regs[rd] <= (pc + (u_type_imm << 12));
+					current_state <= IDLE;	
 				end
 				TYPE_LUI: begin
+					regs[rd] <= (u_type_imm << 12);
+					current_state <= IDLE;
 				end
 			endcase
 		end
