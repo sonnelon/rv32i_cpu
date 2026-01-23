@@ -17,9 +17,10 @@ localparam TYPE_I_OPCODE = 7'b0010011;
 localparam TYPE_S_OPCODE = 7'b0100011;
 localparam TYPE_R_OPCODE = 7'b0110011;
 localparam TYPE_B_OPCODE = 7'b1100011;
-localparam TYPE_J_OPCODE = 7'b1101111;
 localparam TYPE_LUI_OPCODE = 7'b0110111;
 localparam TYPE_AUIPC_OPCODE = 7'b0010111;
+localparam TYPE_JAL_OPCODE = 7'b1101111;
+localparam TYPE_JALR_OPCODE = 7'1100111;
 
 localparam ADDI_FN3 = 3'b000;
 localparam SLTI_FN3 = 3'b010;
@@ -55,9 +56,10 @@ localparam TYPE_I = 2'h14;
 localparam TYPE_S = 2'h15;
 localparam TYPE_R = 2'h16;
 localparam TYPE_B = 2'h17;
-localparam TYPE_J = 2'h18;
 localparam TYPE_LUI = 2'h19;
 localparam TYPE_AUIPC = 2'h20;
+localparam TYPE_JAL = 2'h18;
+localparam TYPE_JALR = 2'h21;
 
 localparam NOTHING = 3'h100;
 
@@ -122,11 +124,19 @@ always @ (posedge clk or posedge rst) begin
 				current_instr_class <= TYPE_B;
 				current_state <= EXEC;
 			end
-			TYPE_J_OPCODE: begin
+			TYPE_JALR_OPCODE: begin
+				rd <= instr[11:7];
+				funct3 <= instr[14:12];
+				rs1 <= instr[19:15];
+				j_type_imm <= instr[31:20]
+				current_instr_class <= TYPE_JALR;
+				current_state <= EXEC;
+			end
+			TYPE_JAL_OPCODE: begin
 				rd <= instr[11:7];
 				j_type_imm <= instr[20:12];
 				j_type_imm2 <= instr[31:21];
-				current_instr_class <= TYPE_J;
+				current_instr_class <= TYPE_JAL;
 				current_state <= EXEC;
 			end
 			TYPE_R_OPCODE: begin
@@ -254,8 +264,6 @@ always @ (posedge clk or posedge rst) begin
 						end
 					endcase
 				end
-				TYPE_J: begin
-				end
 				TYPE_R: begin
 					if (funct3 == ADD_FN3 && funct7 == ADD_FN7) begin
 						regs[rd] <= regs[rs1] + regs[rs2];
@@ -309,6 +317,16 @@ always @ (posedge clk or posedge rst) begin
 					regs[rd] <= (u_type_imm << 12);
 					current_state <= IDLE;
 				end
+				TYPE_JAL: begin
+					pc <= pc + j_type_imm + j_type_imm2;
+					regs[rd] <= pc + j_type_imm + j_type_imm2;
+					current_state <= IDLE;
+				end
+				TYPE_JALR: begin
+					pc <= pc + regs[rs1] + j_type_imm;	
+					regs[rd] <= pc + regs[rs1] + j_type_imm;
+					current_state <= IDLE;
+				end
 			endcase
 		end
 
@@ -321,5 +339,4 @@ always @ (posedge clk or posedge rst) begin
 		endcase
 	end
 end
-
 endmodule
