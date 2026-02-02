@@ -294,10 +294,10 @@ def main() -> None:
 	data = parse_file(args.file_path)
 	
 	instrs = parse_instrs(data)
-	instrs_str = " ".join(map(hex, instrs)) if not args.b else " ".join(map(bin, instrs))
+	instrs_str = " ".join(map(hex, instrs)) if not args.b else " ".join(map(bin, instrs)).replace('0b', "")
 	if args.o is not None:
-		with open(args.o, "a") as f:
-			f.write(" ".join(instrs_str) + "\n")
+		with open(args.o, "a", encoding="utf-8") as f:
+			f.write(instrs_str  + "\n")
 	else:
 		print(instrs_str)
 

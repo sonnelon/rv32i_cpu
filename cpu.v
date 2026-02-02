@@ -1,6 +1,6 @@
 module cpu (
 	input wire clk,
-	input wire rst,
+	input wire rst
 );
 
 reg [31:0] regs [0:31];
@@ -20,7 +20,7 @@ localparam TYPE_B_OPCODE = 7'b1100011;
 localparam TYPE_LUI_OPCODE = 7'b0110111;
 localparam TYPE_AUIPC_OPCODE = 7'b0010111;
 localparam TYPE_JAL_OPCODE = 7'b1101111;
-localparam TYPE_JALR_OPCODE = 7'1100111;
+localparam TYPE_JALR_OPCODE = 7'b1100111;
 
 localparam ADDI_FN3 = 3'b000;
 localparam SLTI_FN3 = 3'b010;
@@ -29,6 +29,7 @@ localparam XORI_FN3 = 3'b100;
 localparam ORI_FN3 = 3'b110;
 localparam ANDI_FN3 = 3'b111;
 
+localparam AND_FN3 = 3'b111;
 localparam ADD_FN3 = 3'b000;
 localparam SUB_FN3 = 3'b000;
 localparam SLL_FN3 = 3'b001;
@@ -52,47 +53,53 @@ localparam SRA_FN7 = 7'b0100000;
 localparam OR_FN7 =  7'b0000000;
 localparam XOR_FN7 = 7'b0000000;
 
-localparam TYPE_I = 2'h14;
-localparam TYPE_S = 2'h15;
-localparam TYPE_R = 2'h16;
-localparam TYPE_B = 2'h17;
-localparam TYPE_LUI = 2'h19;
-localparam TYPE_AUIPC = 2'h20;
-localparam TYPE_JAL = 2'h18;
-localparam TYPE_JALR = 2'h21;
+localparam BOOT_ROM_ADDR_MAP = 32'b00000000000000000000000000000100;
 
-localparam NOTHING = 3'h100;
+localparam [4:0] TYPE_I     = 5'b0_1111;
+localparam [4:0] TYPE_S     = 5'b0_1100;
+localparam [4:0] TYPE_R     = 5'b0_1000;
+localparam [4:0] TYPE_B     = 5'b0_1010;
+localparam [4:0] TYPE_LUI   = 5'b0_1101;
+localparam [4:0] TYPE_AUIPC = 5'b0_1011;
+localparam [4:0] TYPE_JAL   = 5'b0_0011;
+localparam [4:0] TYPE_JALR  = 5'b0_1110;
 
-parameter COUNT_RAM_WORD = 1024;
+localparam NOTHING = 4'b0000;
+
+parameter COUNT_RAM_WORD = 262_144;
 parameter SIZE_WORD		 = 32;
 
-reg [2:0] current_instr_class;
+reg [6:0] 		opcode;
+reg [4:0] 		rd;
+reg [1:0] 		funct3;
+reg [4:0] 		rs1;
+reg [4:0] 		rs2;
+reg [6:0] 		funct7;
+reg [11:0] 	i_type_imm;
+reg [4:0] 		s_type_imm;
+reg [6:0] 		s_type_imm2;
+reg [19:0] 	u_type_imm;
+reg [4:0] 		b_type_imm;
+reg [6:0] 		b_type_imm2;
+reg [8:0] 		j_type_imm;
+reg [11:0] 	j_type_imm2;
 
-wire [6:0] 		opcode;
-wire [4:0] 		rd;
-wire [1:0] 		funct3;
-wire [4:0] 		rs1;
-wire [4:0] 		rs2;
-wire [6:0] 		funct7;
-wire [11:0] 	i_type_imm;
-wire [4:0] 		s_type_imm;
-wire [6:0] 		s_type_imm2;
-wire [19:0] 	u_type_imm;
-wire [4:0] 		b_type_imm;
-wire [6:0] 		b_type_imm2;
-wire [8:0] 		j_type_imm;
-wire [11:0] 	j_type_imm2;
-
-reg [1:0] current_state;
+reg [2:0] current_state;
+reg [4:0] current_instr_class;
 reg [SIZE_WORD-1:0] ram [0:COUNT_RAM_WORD-1];
+reg [SIZE_WORD-1:0] rom [0:1024];
 reg [INSTR_SIZE-1:0] instr;
 
+initial begin
+	$readmesh("boot_rom.hex", rom);
+end
+
 always @ (posedge clk or posedge rst) begin
+	regs[0] <= 32'b0;
 	if (rst) begin
 		pc <= 0;
-		integer i;
-		for (i = 0; i < COUNT_RAM_WORD; i = i + 1) begin
-			regs[i] <= 'b0;
+		for (integer i = 1; i < COUNT_RAM_WORD; i = i + 1) begin
+			regs[i] <= 32'b0;
 		end
 		current_state <= IDLE;
 		current_instr_class <= NOTHING;
@@ -100,7 +107,11 @@ always @ (posedge clk or posedge rst) begin
 	end else begin
 		case (current_state)
 		FETCH: begin
-			instr <= ram[pc >> 2];
+			if (pc > BOOT_ROM_ADDR_MAP) begin
+				instr <= ram[pc >> 2];
+			end else begin
+				instr <= rom[pc >> 2];
+			end
 			current_state <= DECODE;	
 		end
 
@@ -128,7 +139,7 @@ always @ (posedge clk or posedge rst) begin
 				rd <= instr[11:7];
 				funct3 <= instr[14:12];
 				rs1 <= instr[19:15];
-				j_type_imm <= instr[31:20]
+				j_type_imm <= instr[31:20];
 				current_instr_class <= TYPE_JALR;
 				current_state <= EXEC;
 			end
@@ -142,7 +153,7 @@ always @ (posedge clk or posedge rst) begin
 			TYPE_R_OPCODE: begin
 				rd <= instr[11:7];
 				funct3 <= instr[14:12];
-				rs <= instr[19:15];
+				rs1 <= instr[19:15];
 				rs2 <= instr[24:20];
 				funct7 <= instr[31:25];
 				current_instr_class <= TYPE_R;
@@ -151,10 +162,10 @@ always @ (posedge clk or posedge rst) begin
 			TYPE_S_OPCODE: begin
 				s_type_imm <= instr[11:7];
 				funct3 <= instr[14:12];
-				rs <= instr[19:15];
+				rs1 <= instr[19:15];
 				rs2 <= instr[24:20];
 				s_type_imm2 <= instr[31:25];
-				current_instr_state <= TYPE_S;
+				current_instr_class <= TYPE_S;
 				current_state <= EXEC;
 			end
 			TYPE_LUI_OPCODE: begin
@@ -177,7 +188,7 @@ always @ (posedge clk or posedge rst) begin
 				TYPE_I: begin
 					case (funct3)
 						ADDI_FN3: begin
-							regs[rd] <= regs[rs] + i_type_imm;
+							regs[rd] <= regs[rs1] + i_type_imm;
 							current_state <= IDLE;
 						end
 						SLTI_FN3: begin
@@ -274,7 +285,7 @@ always @ (posedge clk or posedge rst) begin
 					end else if (funct3 == SLL_FN3 && funct7 == SLL_FN7) begin
 						regs[rd] <= regs[rs1] << regs[rs2];
 						current_state <= IDLE;
-					end else if (funct3 == SLT_FN3 && funct7 == SLT_FN7) begin
+					end else if (funct3 == SLTI_FN3 && funct7 == SLL_FN7) begin
 						if ($signed(regs[rs1]) < $signed(regs[rs2])) begin
 							regs[rd] <= 1;
 							current_state <= IDLE;
@@ -282,7 +293,7 @@ always @ (posedge clk or posedge rst) begin
 							regs[rd] <= 0;
 							current_state <= IDLE;
 						end
-					end else if (funct3 == SLTU_FN3 && funct7 == SLTU_FN7) begin
+					end else if (funct3 == SLTIU_FN3 && funct7 == SLL_FN7) begin
 						if ($unsigned(regs[rs1]) < $unsigned(regs[rs2])) begin
 							regs[rd] <= 1;
 							current_state <= IDLE;
@@ -302,12 +313,10 @@ always @ (posedge clk or posedge rst) begin
 					end else if (funct3 == OR_FN3 && funct7 == OR_FN7) begin
 						regs[rd] <= regs[rs1] | regs[rs2];
 						current_state <= IDLE;
-					end else if (funct3 == AND_FN3 && funct7 == AND_FN7) begin
+					end else if (funct3 == AND_FN3 && funct7 == SLL_FN7) begin
 						regs[rd] <= regs[rs1] & regs[rs2];
 						current_state <= IDLE;
 					end
-				end
-				TYPE_S: begin
 				end
 				TYPE_AUIPC: begin
 					regs[rd] <= (pc + (u_type_imm << 12));
@@ -320,12 +329,12 @@ always @ (posedge clk or posedge rst) begin
 				TYPE_JAL: begin
 					pc <= pc + j_type_imm + j_type_imm2;
 					regs[rd] <= pc + j_type_imm + j_type_imm2;
-					current_state <= IDLE;
+					current_state <= DECODE;
 				end
 				TYPE_JALR: begin
 					pc <= pc + regs[rs1] + j_type_imm;	
 					regs[rd] <= pc + regs[rs1] + j_type_imm;
-					current_state <= IDLE;
+					current_state <= DECODE;
 				end
 			endcase
 		end
